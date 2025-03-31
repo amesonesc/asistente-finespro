@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asistente FINESpro</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    #chatbox { border: 1px solid #ccc; background: #fff; padding: 10px; height: 400px; overflow-y: auto; margin-bottom: 10px; }
+    .user { text-align: right; margin: 5px; }
+    .bot { text-align: left; margin: 5px; }
+    input[type="text"] { width: 80%; padding: 10px; }
+    button { padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Asistente FINESpro</h2>
+  <p><em>Hola, soy el asistente de FINESpro de 1145. ¿En qué te puedo ayudar?</em></p>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." />
+  <button onclick="sendMessage()">Enviar</button>
+
+  <script>
+    const apiKey = "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"; // <-- Reemplaza esto con tu propia API Key
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value;
+      if (!message) return;
+
+      appendMessage("user", message);
+      input.value = "";
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "Eres un abogado con mucha experiencia en temas regulatorios del Perú. Responde con tono profesional, en español por defecto, salvo que el usuario lo haga en otro idioma." },
+            { role: "user", content: message }
+          ],
+          temperature: 0.7,
+        })
+      });
+
+      const data = await response.json();
+      const reply = data.choices[0].message.content;
+      appendMessage("bot", reply);
+    }
+
+    function appendMessage(sender, text) {
+      const chatbox = document.getElementById("chatbox");
+      const msg = document.createElement("div");
+      msg.className = sender;
+      msg.innerText = text;
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
